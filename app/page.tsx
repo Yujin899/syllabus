@@ -1,18 +1,9 @@
-'use client';
-
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-
 export default function Home() {
-    const router = useRouter();
-
-    useEffect(() => {
-        router.replace("/auth/login");
-    }, [router]);
-
     return (
-        <div className="flex items-center justify-center min-h-screen bg-[#004E98] text-white font-sans italic text-sm">
-            Redirecting to Syllabus...
+        <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+            <h1>Syllabus Platform</h1>
+            <p>If you see this, the root route is working.</p>
+            <a href="/auth/login" style={{ color: '#004E98', fontWeight: 'bold' }}>Go to Login Page</a>
         </div>
     );
 }
