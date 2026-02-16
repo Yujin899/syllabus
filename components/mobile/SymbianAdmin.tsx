@@ -11,8 +11,26 @@ import { cn } from '@/lib/utils';
 // --- Types ---
 type AdminView = 'home' | 'users' | 'subjects' | 'subject-detail' | 'quiz-detail' | 'add-question';
 
+interface SubjectViewData {
+    id: string;
+    name: string;
+}
+
+interface QuizViewData {
+    subjectId: string;
+    quizId: string;
+    title: string;
+}
+
+interface QuestionViewData {
+    subjectId: string;
+    quizId: string;
+}
+
+type ViewData = SubjectViewData | QuizViewData | QuestionViewData | Subject;
+
 export function SymbianAdmin() {
-    const [viewStack, setViewStack] = useState<{ view: AdminView, data?: unknown }[]>([{ view: 'home' }]);
+    const [viewStack, setViewStack] = useState<{ view: AdminView, data?: ViewData }>([{ view: 'home' }]);
     const [loading, setLoading] = useState(false);
 
     // Data State
@@ -27,7 +45,7 @@ export function SymbianAdmin() {
     const currentView = viewStack[viewStack.length - 1];
 
     // --- Navigation ---
-    const navigate = (view: AdminView, data?: unknown) => {
+    const navigate = (view: AdminView, data?: ViewData) => {
         setViewStack([...viewStack, { view, data }]);
         setNewItemName(''); // Reset form
     };
@@ -87,7 +105,7 @@ export function SymbianAdmin() {
 
     const handleAddQuiz = async () => {
         if (!newItemName.trim()) return;
-        const subjectId = (currentView.data as any).id;
+        const subjectId = (currentView.data as Subject).id;
         setLoading(true);
         try {
             await addQuiz(subjectId, newItemName);
@@ -100,8 +118,8 @@ export function SymbianAdmin() {
         if (!confirm('Delete this quiz?')) return;
         setLoading(true);
         try {
-            await deleteQuiz((currentView.data as any).id, id);
-            await loadQuizzes((currentView.data as any).id);
+            await deleteQuiz((currentView.data as Subject).id, id);
+            await loadQuizzes((currentView.data as Subject).id);
         } finally { setLoading(false); }
     };
 
@@ -192,10 +210,11 @@ export function SymbianAdmin() {
 
     // 4. Subject Detail (Quizzes List)
     if (currentView.view === 'subject-detail') {
+        const subject = currentView.data as Subject;
         return (
             <div className="flex flex-col h-full bg-[#121212] font-sans text-white">
-                <Header title={(currentView.data as any).name} onBack={goBack} loading={loading}
-                    action={<button onClick={() => handleDeleteSubject((currentView.data as any).id)}><Trash2 className="w-4 h-4 text-[#F44]" /></button>}
+                <Header title={subject.name} onBack={goBack} loading={loading}
+                    action={<button onClick={() => handleDeleteSubject(subject.id)}><Trash2 className="w-4 h-4 text-[#F44]" /></button>}
                 />
                 <div className="p-2 border-b border-[#333] flex gap-2">
                     <input
@@ -212,7 +231,7 @@ export function SymbianAdmin() {
                     {quizzes.map(q => (
                         <div key={q.id} className="bg-[#222] p-3 rounded-sm border border-[#333] flex items-center justify-between">
                             <div
-                                onClick={() => { loadQuizDetails((currentView.data as any).id, q.id); navigate('quiz-detail', { subjectId: (currentView.data as any).id, quizId: q.id, title: q.title }); }}
+                                onClick={() => { loadQuizDetails(subject.id, q.id); navigate('quiz-detail', { subjectId: subject.id, quizId: q.id, title: q.title }); }}
                                 className="flex items-center gap-3 flex-1"
                             >
                                 <FileText className="w-5 h-5 text-[#88BBFF]" />
@@ -230,12 +249,13 @@ export function SymbianAdmin() {
 
     // 5. Quiz Detail (Questions List)
     if (currentView.view === 'quiz-detail') {
+        const quizData = currentView.data as QuizViewData;
         return (
             <div className="flex flex-col h-full bg-[#121212] font-sans text-white">
-                <Header title={(currentView.data as any).title} onBack={goBack} loading={loading} />
+                <Header title={quizData.title} onBack={goBack} loading={loading} />
 
                 <div className="p-2 border-b border-[#333]">
-                    <button onClick={() => navigate('add-question', currentView.data)} className="w-full bg-[#0055AA] p-2 rounded-sm text-white flex items-center justify-center gap-2">
+                    <button onClick={() => navigate('add-question', { subjectId: quizData.subjectId, quizId: quizData.quizId })} className="w-full bg-[#0055AA] p-2 rounded-sm text-white flex items-center justify-center gap-2">
                         <Plus className="w-4 h-4" /> Add Question
                     </button>
                 </div>
@@ -267,13 +287,14 @@ export function SymbianAdmin() {
 
     // 6. Add/Edit Question Form
     if (currentView.view === 'add-question') {
+        const qData = currentView.data as QuestionViewData;
         return <QuestionEditor
             onSave={async (q) => {
                 setLoading(true);
                 try {
                     const updatedQuestions = [...(currentQuiz?.questions || []), q];
-                    await updateQuizQuestions((currentView.data as any).subjectId, (currentView.data as any).quizId, updatedQuestions);
-                    await loadQuizDetails((currentView.data as any).subjectId, (currentView.data as any).quizId);
+                    await updateQuizQuestions(qData.subjectId, qData.quizId, updatedQuestions);
+                    await loadQuizDetails(qData.subjectId, qData.quizId);
                     goBack();
                 } finally { setLoading(false); }
             }}
