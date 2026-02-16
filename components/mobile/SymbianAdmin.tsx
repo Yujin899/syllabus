@@ -30,7 +30,7 @@ interface QuestionViewData {
 type ViewData = SubjectViewData | QuizViewData | QuestionViewData | Subject;
 
 export function SymbianAdmin() {
-    const [viewStack, setViewStack] = useState<{ view: AdminView, data?: ViewData }>([{ view: 'home' }]);
+    const [viewStack, setViewStack] = useState<{ view: AdminView, data?: ViewData }[]>([{ view: 'home' }]);
     const [loading, setLoading] = useState(false);
 
     // Data State
