@@ -3,6 +3,27 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Windows XP Palette - Luna Official */
+  --xp-blue: #003399;
+  --xp-title-gradient: linear-gradient(to right, #0055EE, #0872FB, #0055EE);
+  --xp-bg: #245ED1;
+  --xp-primary: #ECE9D8;
+  --xp-desktop: #008080; /* Classic Teal */
+  --xp-text: #000000;
+  --xp-border-light: #FFFFFF;
+  --xp-border-dark: #808080;
+  --xp-border-shadow: #404040;
+
+  /* Symbian / Nokia Palette - Strict 2006 Graphite */
+  --symbian-bg: #000000;
+  --symbian-header: #111111;
+  --symbian-row-bg: #111111;
+  --symbian-row-highlight: #124191; /* Nokia Blue */
+  --symbian-border: #2F2F2F;
+  --symbian-text: #FFFFFF;
+  --symbian-text-dim: #CFCFCF;
+  --symbian-softkey-bg: #111111;
+  --symbian-status-bar: #000000;
 }
 
 @theme inline {
@@ -10,6 +31,136 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+@layer base {
+  .xp-ui {
+    font-family: 'Tahoma', 'MS Sans Serif', 'Arial', sans-serif !important;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeSpeed;
+    image-rendering: pixelated;
+    font-size: 11px;
+    line-height: normal;
+    letter-spacing: 0;
+    user-select: none;
+    cursor: default;
+  }
+
+  .xp-ui input {
+    color: #444444 !important;
+  }
+
+  .xp-desktop-icon-label {
+    color: #FFFFFF;
+    text-shadow: 1px 1px 1px #000000;
+    font-family: 'Tahoma', sans-serif;
+    font-size: 11px;
+    line-height: 12px;
+    text-align: center;
+    background: transparent;
+  }
+
+  .xp-ui *, .xp-ui input, .xp-ui button {
+    transition: none !important;
+    animation-duration: 0s !important;
+    border-radius: 0;
+    box-shadow: none !important;
+  }
+
+  /* Symbian Base Styles */
+  .symbian-ui {
+    font-family: 'Arial', 'Helvetica', sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    font-size: 12px;
+    color: var(--symbian-text);
+    background-color: var(--symbian-bg);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .symbian-ui * {
+    transition: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none !important;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+
+  .xp-border-outset {
+    border: 2px solid;
+    border-color: var(--xp-border-light) var(--xp-border-dark) var(--xp-border-dark) var(--xp-border-light);
+    box-shadow: inset 1px 1px 0px white, 1px 1px 0px var(--xp-border-shadow);
+  }
+
+  .xp-border-inset {
+    border: 2px solid;
+    border-color: var(--xp-border-dark) var(--xp-border-light) var(--xp-border-light) var(--xp-border-dark);
+  }
+
+  .symbian-border-thin {
+    border: 1px solid var(--symbian-border);
+  }
+
+  .xp-button {
+    background: linear-gradient(to bottom, #FFFFFF 0%, #E0E0E0 100%);
+    border: 1px solid #003399;
+    border-radius: 3px !important;
+    padding: 2px 12px;
+    color: black;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 1px 1px 1px rgba(0,0,0,0.2) !important;
+    cursor: default;
+  }
+
+  .xp-button:active {
+    background: #E0E0E0;
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2) !important;
+  }
+
+  .xp-button-alt {
+    background: #ECE9D8;
+    border: 1px solid #808080;
+    padding: 2px 8px;
+    color: black;
+    box-shadow: 1px 1px 0px white inset !important;
+  }
+
+  .xp-button-alt:active {
+    background: #D4D0C8;
+    border-color: #404040 white white #404040;
+  }
+
+  .no-print {
+    display: block;
+  }
+
+  .crisp-edges {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: pixelated;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .xp-ui {
+    background: white !important;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +173,4 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
