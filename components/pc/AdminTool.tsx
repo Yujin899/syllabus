@@ -95,11 +95,19 @@ export function AdminTool() {
     const handleAddSubject = async () => {
         if (!newSubjectName) return;
         setLoading(true);
+        const name = newSubjectName;
         try {
-            await addSubject(newSubjectName, Number(newSubjectOrder));
+            await addSubject(name, Number(newSubjectOrder));
             setNewSubjectName('');
             await fetchAllSubjects();
             setStatusMsg('Subject added successfully');
+
+            // Notify Discord (Silently)
+            fetch('/api/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'subject', subjectName: name })
+            }).catch(console.error);
         } catch (e) {
             console.error(e);
             setStatusMsg('Seeding failed: ' + (e instanceof Error ? e.message : String(e)));
@@ -128,11 +136,24 @@ export function AdminTool() {
     const handleAddQuiz = async () => {
         if (!selectedSubjectId || !newQuizTitle) return;
         setLoading(true);
+        const title = newQuizTitle;
+        const subject = subjects.find(s => s.id === selectedSubjectId);
         try {
-            await addQuiz(selectedSubjectId, newQuizTitle);
+            await addQuiz(selectedSubjectId, title);
             setNewQuizTitle('');
             await fetchSubjectQuizzes(selectedSubjectId);
             setStatusMsg('Quiz added successfully');
+
+            // Notify Discord (Silently)
+            fetch('/api/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'quiz',
+                    subjectName: subject?.name || 'Unknown Subject',
+                    quizTitle: title
+                })
+            }).catch(console.error);
         } catch (e) {
             console.error(e);
             setStatusMsg('Error adding quiz');

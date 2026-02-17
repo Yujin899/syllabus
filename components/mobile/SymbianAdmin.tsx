@@ -86,10 +86,18 @@ export function SymbianAdmin() {
     const handleAddSubject = async () => {
         if (!newItemName.trim()) return;
         setLoading(true);
+        const name = newItemName;
         try {
-            await addSubject(newItemName, subjects.length);
+            await addSubject(name, subjects.length);
             await loadSubjects();
             setNewItemName('');
+
+            // Notify Discord (Silently)
+            fetch('/api/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'subject', subjectName: name })
+            }).catch(console.error);
         } finally { setLoading(false); }
     };
 
@@ -105,12 +113,24 @@ export function SymbianAdmin() {
 
     const handleAddQuiz = async () => {
         if (!newItemName.trim()) return;
-        const subjectId = (currentView.data as Subject).id;
+        const subject = currentView.data as Subject;
+        const title = newItemName;
         setLoading(true);
         try {
-            await addQuiz(subjectId, newItemName);
-            await loadQuizzes(subjectId);
+            await addQuiz(subject.id, title);
+            await loadQuizzes(subject.id);
             setNewItemName('');
+
+            // Notify Discord (Silently)
+            fetch('/api/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'quiz',
+                    subjectName: subject.name,
+                    quizTitle: title
+                })
+            }).catch(console.error);
         } finally { setLoading(false); }
     };
 
