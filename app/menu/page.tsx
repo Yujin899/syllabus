@@ -12,8 +12,8 @@ import { Folder, FileText, Loader2, ArrowLeft, LayoutGrid, Layers, Globe, AlertC
 import {
     getSubjects,
     getQuizzes,
-    getMistakesCount,
     getSubjectMistakes,
+    listenToMistakes,
     Subject,
     Quiz,
     SubjectMistakes
@@ -40,7 +40,7 @@ type NavStackItem = {
 
 export default function MenuPage() {
     const [stack, setStack] = useState<NavStackItem[]>([{ id: 'home' }]);
-    const [selectedIndex, setSelectedIndex] = useState(0);
+    const [selectedIndex, setSelectedIndex] = useState(-1);
     const [showRecent, setShowRecent] = useState(false);
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [mistakesCounts, setMistakesCounts] = useState<Record<string, number>>({});
@@ -57,31 +57,27 @@ export default function MenuPage() {
     }, [deviceType, router]);
 
     useEffect(() => {
-        if (authLoading) return;
+        if (authLoading || !user) return;
 
+        // Reactive mistakes listener
+        const unsubscribe = listenToMistakes(user.uid, (counts) => {
+            setMistakesCounts(counts);
+        });
+
+        // Still fetch subjects once (they rarely change in a single session)
         const fetchInitialData = async () => {
-            if (!user) {
-                setLoading(false);
-                return;
-            }
-
             try {
                 const fetchedSubjects = await getSubjects();
                 setSubjects(fetchedSubjects);
-
-                const counts: Record<string, number> = {};
-                for (const s of fetchedSubjects) {
-                    const count = await getMistakesCount(user.uid, s.id);
-                    counts[s.id] = count;
-                }
-                setMistakesCounts(counts);
             } catch (error) {
                 console.error("Failed to fetch subjects:", error);
             } finally {
                 setLoading(false);
             }
         };
+
         fetchInitialData();
+        return () => unsubscribe();
     }, [user, authLoading]);
 
     const currentScreen = stack[stack.length - 1];

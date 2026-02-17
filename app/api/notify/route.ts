@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Use the explicit public URL for stability
-        const publicBaseUrl = 'https://www.syllabus-os.vercel.app';
+        const publicBaseUrl = 'https://syllabus-os.vercel.app';
 
         // Configuration for Embeds
         const config = {

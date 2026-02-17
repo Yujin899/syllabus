@@ -7,7 +7,7 @@ type SymbianHomeProps = {
 };
 
 export function SymbianHome({ onOpenApp }: SymbianHomeProps) {
-    const [selectedIndex, setSelectedIndex] = React.useState(0);
+    const [selectedIndex, setSelectedIndex] = React.useState(-1);
 
     const apps = [
         { id: 'my-files', label: 'My Files', icon: '/symbian/folder.png' },

@@ -13,7 +13,8 @@ import {
     setDoc,
     addDoc,
     serverTimestamp,
-    where
+    where,
+    onSnapshot
 } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -212,6 +213,21 @@ export const getSubjectMistakes = async (userId: string, subjectId: string): Pro
         subjectId,
         quizzes
     };
+};
+
+export const listenToMistakes = (userId: string, callback: (counts: Record<string, number>) => void) => {
+    const mistakesCol = collection(db, 'users', userId, 'mistakes');
+    return onSnapshot(mistakesCol, (snapshot) => {
+        const counts: Record<string, number> = {};
+        snapshot.docs.forEach(doc => {
+            const data = doc.data();
+            const sId = data.subjectId;
+            if (sId) {
+                counts[sId] = (counts[sId] || 0) + 1;
+            }
+        });
+        callback(counts);
+    });
 };
 
 export { auth, db };

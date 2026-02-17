@@ -10,8 +10,8 @@ import { XPStartMenu } from '@/components/pc/XPStartMenu';
 import {
     getSubjects,
     getQuizzes,
-    getMistakesCount,
     getSubjectMistakes,
+    listenToMistakes,
     Subject,
     Quiz,
     SubjectMistakes
@@ -60,31 +60,26 @@ export default function DesktopPage() {
     }, [deviceType, router]);
 
     useEffect(() => {
-        if (authLoading) return;
+        if (authLoading || !user) return;
+
+        // Reactive mistakes listener
+        const unsubscribe = listenToMistakes(user.uid, (counts) => {
+            setMistakesCounts(counts);
+        });
 
         const fetchInitialData = async () => {
-            if (!user) {
-                setLoading(false);
-                return;
-            }
-
             try {
                 const fetchedSubjects = await getSubjects();
                 setSubjects(fetchedSubjects);
-
-                const counts: Record<string, number> = {};
-                for (const s of fetchedSubjects) {
-                    const count = await getMistakesCount(user.uid, s.id);
-                    counts[s.id] = count;
-                }
-                setMistakesCounts(counts);
             } catch (error) {
                 console.error("Failed to fetch subjects:", error);
             } finally {
                 setLoading(false);
             }
         };
+
         fetchInitialData();
+        return () => unsubscribe();
     }, [user, authLoading]);
 
     const openWindow = async (type: ActiveWindow['type'], data?: ActiveWindow['data'] | string) => {
