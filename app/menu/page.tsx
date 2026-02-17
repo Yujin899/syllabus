@@ -124,7 +124,7 @@ export default function MenuPage() {
                 try {
                     const quizzes = await getQuizzes(data.id!);
                     setStack([...stack, { id: 'quizzes', data: { ...data, quizzes } }]);
-                    setSelectedIndex(0);
+                    setSelectedIndex(-1);
                 } finally {
                     setLoading(false);
                 }
@@ -137,7 +137,7 @@ export default function MenuPage() {
                     // Open in Browser
                     const url = `file:///C:/My Files/${currentScreen.data!.name}/Mistakes.pdf`;
                     setStack([...stack, { id: 'browser', data: { url, content: 'mistakes', mistakesData: mistakes || undefined } }]);
-                    setSelectedIndex(0);
+                    setSelectedIndex(-1);
                 } finally {
                     setLoading(false);
                 }
@@ -162,7 +162,7 @@ export default function MenuPage() {
             const newStack = [...stack];
             newStack.pop();
             setStack(newStack);
-            setSelectedIndex(0);
+            setSelectedIndex(-1);
         }
     };
 
@@ -427,7 +427,7 @@ export default function MenuPage() {
                     <button
                         onClick={() => {
                             setStack([{ id: 'home' }]);
-                            setSelectedIndex(0);
+                            setSelectedIndex(-1);
                         }}
                         className="flex flex-col items-center justify-center w-16 h-full active:bg-[#333] transition-colors"
                     >
