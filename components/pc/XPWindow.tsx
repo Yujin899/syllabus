@@ -30,9 +30,15 @@ export function XPWindow({
     icon,
 }: XPWindowProps) {
     const [pos, setPos] = useState({ x: defaultX, y: defaultY });
+    const [size, setSize] = useState({ width: 500, height: 380 });
     const [isDragging, setIsDragging] = useState(false);
+    const [isResizing, setIsResizing] = useState(false);
     const dragOffset = useRef({ x: 0, y: 0 });
+    const resizeStart = useRef({ w: 0, h: 0, x: 0, y: 0 });
     const [isInitialRender, setIsInitialRender] = useState(true);
+
+    const MIN_WIDTH = 300;
+    const MIN_HEIGHT = 200;
 
     useEffect(() => {
         const timer = setTimeout(() => setIsInitialRender(false), 180);
@@ -40,27 +46,36 @@ export function XPWindow({
     }, []);
 
     useEffect(() => {
-        if (!isDragging || isMaximized) return;
+        if (isMaximized) return;
 
         const handleMouseMove = (e: MouseEvent) => {
-            setPos({
-                x: e.clientX - dragOffset.current.x,
-                y: e.clientY - dragOffset.current.y
-            });
+            if (isDragging) {
+                setPos({
+                    x: e.clientX - dragOffset.current.x,
+                    y: e.clientY - dragOffset.current.y
+                });
+            } else if (isResizing) {
+                const newWidth = Math.max(MIN_WIDTH, resizeStart.current.w + (e.clientX - resizeStart.current.x));
+                const newHeight = Math.max(MIN_HEIGHT, resizeStart.current.h + (e.clientY - resizeStart.current.y));
+                setSize({ width: newWidth, height: newHeight });
+            }
         };
 
         const handleMouseUp = () => {
             setIsDragging(false);
+            setIsResizing(false);
         };
 
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseup', handleMouseUp);
+        if (isDragging || isResizing) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+        }
 
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
         };
-    }, [isDragging, isMaximized]);
+    }, [isDragging, isResizing, isMaximized]);
 
     const handleMouseDown = (e: React.MouseEvent) => {
         if (isMaximized) return;
@@ -71,13 +86,25 @@ export function XPWindow({
         };
     };
 
+    const handleResizeMouseDown = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsResizing(true);
+        resizeStart.current = {
+            w: size.width,
+            h: size.height,
+            x: e.clientX,
+            y: e.clientY
+        };
+    };
+
     return (
         <div
             style={{
                 left: isMaximized ? '0' : `${pos.x}px`,
                 top: isMaximized ? '0' : `${pos.y}px`,
-                width: isMaximized ? '100vw' : '500px',
-                height: isMaximized ? 'calc(100vh - 30px)' : '380px',
+                width: isMaximized ? '100vw' : `${size.width}px`,
+                height: isMaximized ? 'calc(100vh - 40px)' : `${size.height}px`,
                 transform: isInitialRender ? 'scale(0.95)' : 'scale(1)',
                 opacity: isInitialRender ? 0 : 1,
                 borderRadius: isMaximized ? '0' : '5px 5px 0 0'
@@ -159,8 +186,25 @@ export function XPWindow({
                 <div className="flex-1 border-r border-[#ACA899] h-full flex items-center px-1 leading-none shadow-[inset_-1px_0px_0px_white]">
                     Done
                 </div>
-                <div className="w-[120px] h-full flex items-center px-2 leading-none">
+                <div className="w-[120px] h-full flex items-center px-2 leading-none relative">
                     My Computer
+                    {/* Resize Handle */}
+                    {!isMaximized && (
+                        <div
+                            onMouseDown={handleResizeMouseDown}
+                            className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize flex flex-col items-center justify-center p-0.5 gap-0.5 opacity-40 hover:opacity-100"
+                        >
+                            <div className="w-full flex justify-end gap-0.5">
+                                <div className="w-0.5 h-0.5 bg-[#444]" />
+                            </div>
+                            <div className="w-full flex justify-end gap-0.5">
+                                <div className="w-0.5 h-0.5 bg-[#444]" /><div className="w-0.5 h-0.5 bg-[#444]" />
+                            </div>
+                            <div className="w-full flex justify-end gap-0.5">
+                                <div className="w-0.5 h-0.5 bg-[#444]" /><div className="w-0.5 h-0.5 bg-[#444]" /><div className="w-0.5 h-0.5 bg-[#444]" />
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

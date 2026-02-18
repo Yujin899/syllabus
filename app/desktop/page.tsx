@@ -17,6 +17,7 @@ import {
     SubjectMistakes
 } from '@/lib/firebase';
 import { FileText, Loader2, Folder as FolderIcon } from 'lucide-react';
+import { AnalyticsTool } from '@/components/pc/AnalyticsTool';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { AuthGuard } from '@/components/auth/AuthGuard';
@@ -24,7 +25,7 @@ import Image from 'next/image';
 
 interface ActiveWindow {
     id: string;
-    type: 'subjects' | 'quizzes' | 'about' | 'browser' | 'mistakes';
+    type: 'subjects' | 'quizzes' | 'about' | 'browser' | 'mistakes' | 'analytics';
     title: string;
     data?: {
         id?: string;
@@ -44,6 +45,7 @@ interface ActiveWindow {
 export default function DesktopPage() {
     const [windows, setWindows] = useState<ActiveWindow[]>([]);
     const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
+    const [iconPositions, setIconPositions] = useState<Record<string, { x: number; y: number }>>({});
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [loading, setLoading] = useState(true);
     const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
@@ -86,7 +88,8 @@ export default function DesktopPage() {
         let id: string = type;
         let title = type === 'subjects' ? 'Subjects' :
             type === 'browser' ? 'Syllabus Browser' :
-                'About Syllabus';
+                (type as string) === 'analytics' ? 'System Analytics' :
+                    'About Syllabus';
         let windowData: ActiveWindow['data'] = typeof data === 'string' ? { id: data, subjectId: data } : data;
 
         if (type === 'quizzes' && windowData) {
@@ -167,6 +170,13 @@ export default function DesktopPage() {
         }
     };
 
+    const handleIconPositionUpdate = (id: string, x: number, y: number) => {
+        setIconPositions(prev => ({
+            ...prev,
+            [id]: { x, y }
+        }));
+    };
+
     return (
         <AuthGuard>
             <div
@@ -186,22 +196,38 @@ export default function DesktopPage() {
                         selected={selectedIcon === 'subjects'}
                         onSelect={setSelectedIcon}
                         onOpen={() => openWindow('subjects')}
+                        pos={iconPositions['subjects']}
+                        onPositionUpdate={handleIconPositionUpdate}
                     />
                     <DesktopIcon
                         id="browser"
                         label="Syllabus Browser"
-                        icon={<Image src="/windows/browser.png" width={32} height={32} className="crisp-edges" alt="" />}
+                        icon={<Image src="/windows/browser.png" width={32} height={32} className="crisp-edges" style={{ width: 'auto', height: 'auto' }} alt="" />}
                         selected={selectedIcon === 'browser'}
                         onSelect={setSelectedIcon}
                         onOpen={() => openWindow('browser')}
+                        pos={iconPositions['browser']}
+                        onPositionUpdate={handleIconPositionUpdate}
                     />
                     <DesktopIcon
                         id="about"
                         label="About Syllabus"
-                        icon={<Image src="/windows/about.png" width={32} height={32} className="crisp-edges" alt="" />}
+                        icon={<Image src="/windows/about.png" width={32} height={32} className="crisp-edges" style={{ width: 'auto', height: 'auto' }} alt="" />}
                         selected={selectedIcon === 'about'}
                         onSelect={setSelectedIcon}
                         onOpen={() => openWindow('about')}
+                        pos={iconPositions['about']}
+                        onPositionUpdate={handleIconPositionUpdate}
+                    />
+                    <DesktopIcon
+                        id="analytics"
+                        label="Analytics.exe"
+                        icon={<Image src="/windows/analytics.png" width={32} height={32} className="crisp-edges" style={{ width: 'auto', height: 'auto' }} alt="" />}
+                        selected={selectedIcon === 'analytics'}
+                        onSelect={setSelectedIcon}
+                        onOpen={() => openWindow('analytics')}
+                        pos={iconPositions['analytics']}
+                        onPositionUpdate={handleIconPositionUpdate}
                     />
                 </div>
 
@@ -223,6 +249,10 @@ export default function DesktopPage() {
                             icon={win.type === 'browser' ? "/windows/browser.png" :
                                 win.type === 'about' ? "/windows/about.png" : "/windows/folder.png"}
                         >
+                            {(win.type as string) === 'analytics' && (
+                                <AnalyticsTool mistakesCounts={mistakesCounts} subjects={subjects} />
+                            )}
+
                             {win.type === 'subjects' && (
                                 <div className="flex flex-col bg-white h-full overflow-hidden">
                                     {loading ? (
@@ -400,7 +430,7 @@ export default function DesktopPage() {
                                     "h-[24px] px-2 border border-[#1941A5] flex items-center gap-2 min-w-[100px] max-w-[160px] shadow-[inset_1px_1px_1px_rgba(255,255,255,0.2)] cursor-default select-none group",
                                     win.isMinimized ? "bg-[#1A52B3] active:bg-[#0E3A85]" : "bg-[#3D7BDD] active:bg-[#2A66C2]"
                                 )}>
-                                <Image src={win.type === 'subjects' || win.type === 'quizzes' ? "/windows/folder.png" : "/windows/ie.png"} width={16} height={16} alt="" />
+                                <Image src={win.type === 'subjects' || win.type === 'quizzes' ? "/windows/folder.png" : "/windows/browser.png"} width={16} height={16} alt="" />
                                 <span className="text-white text-xs truncate max-w-[100px]">{win.title}</span>
                             </div>
                         ))}

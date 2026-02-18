@@ -49,8 +49,8 @@ export function XPStartMenu({ onOpenWindow, onClose }: XPStartMenuProps) {
                     >
                         <Image src="/windows/browser.png" width={32} height={32} className="crisp-edges" alt="" />
                         <div className="flex flex-col">
-                            <span className="text-[11px] font-bold">Syllabus Browser</span>
-                            <span className="text-[9px] text-[#808080] group-hover:text-white/80">Browse intranet content</span>
+                            <span className="text-[11px] font-bold text-black">Syllabus Browser</span>
+                            <span className="text-[9px] text-[#444] group-hover:text-white/80">Browse intranet content</span>
                         </div>
                     </button>
                     <button
@@ -59,8 +59,8 @@ export function XPStartMenu({ onOpenWindow, onClose }: XPStartMenuProps) {
                     >
                         <Image src="/windows/folder.png" width={32} height={32} className="crisp-edges" alt="" />
                         <div className="flex flex-col">
-                            <span className="text-[11px] font-bold">Subjects</span>
-                            <span className="text-[9px] text-[#808080] group-hover:text-white/80">View your learning modules</span>
+                            <span className="text-[11px] font-bold text-black">Subjects</span>
+                            <span className="text-[9px] text-[#444] group-hover:text-white/80">View your learning modules</span>
                         </div>
                     </button>
 

@@ -8,7 +8,8 @@ import { SymbianHome } from '@/components/mobile/SymbianHome';
 import { SymbianBrowser } from '@/components/mobile/SymbianBrowser';
 import { SymbianWelcome } from '@/components/mobile/SymbianWelcome';
 import { SymbianAdmin } from '@/components/mobile/SymbianAdmin';
-import { Folder, FileText, Loader2, ArrowLeft, LayoutGrid, Layers, Globe, AlertCircle, Check, X } from 'lucide-react';
+import { Folder, FileText, Loader2, ArrowLeft, LayoutGrid, Layers, Globe, AlertCircle, Check, X, BarChart3 } from 'lucide-react';
+import { SymbianAnalytics } from '@/components/mobile/SymbianAnalytics';
 import {
     getSubjects,
     getQuizzes,
@@ -23,7 +24,7 @@ import { cn } from '@/lib/utils';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 
 type NavStackItem = {
-    id: 'home' | 'menu' | 'subjects' | 'quizzes' | 'active-quiz' | 'about' | 'mistakes-report' | 'browser';
+    id: 'home' | 'menu' | 'subjects' | 'quizzes' | 'active-quiz' | 'about' | 'mistakes-report' | 'browser' | 'analytics';
     data?: {
         id?: string;
         name?: string;
@@ -44,6 +45,7 @@ export default function MenuPage() {
     const [showRecent, setShowRecent] = useState(false);
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [mistakesCounts, setMistakesCounts] = useState<Record<string, number>>({});
+    const [homeIconPositions, setHomeIconPositions] = useState<Record<string, { x: number; y: number }>>({});
     const [loading, setLoading] = useState(true);
     const { user, loading: authLoading } = useAuth();
     const router = useRouter();
@@ -83,7 +85,7 @@ export default function MenuPage() {
     const currentScreen = stack[stack.length - 1];
 
     // Menu logic is replaced by Home Screen apps, but we keep this for sub-menus if needed
-    const handleOpenApp = (appId: 'my-files' | 'browser' | 'about') => {
+    const handleOpenApp = (appId: 'my-files' | 'browser' | 'about' | 'analytics') => {
         if (appId === 'my-files') {
             setStack([...stack, { id: 'subjects', data: { mode: 'normal' } }]);
             setSelectedIndex(0);
@@ -91,6 +93,8 @@ export default function MenuPage() {
             setStack([...stack, { id: 'browser', data: { url: 'about:home' } }]);
         } else if (appId === 'about') {
             setStack([...stack, { id: 'about' }]);
+        } else if (appId === 'analytics') {
+            setStack([...stack, { id: 'analytics' }]);
         }
     };
 
@@ -222,7 +226,15 @@ export default function MenuPage() {
                 {/* Content Area */}
                 <div className="flex-1 flex flex-col overflow-hidden relative">
                     {currentScreen.id === 'home' && (
-                        <SymbianHome onOpenApp={handleOpenApp} />
+                        <SymbianHome
+                            onOpenApp={handleOpenApp}
+                            positions={homeIconPositions}
+                            onPositionUpdate={setHomeIconPositions}
+                        />
+                    )}
+
+                    {currentScreen.id === 'analytics' && (
+                        <SymbianAnalytics mistakesCounts={mistakesCounts} subjects={subjects} />
                     )}
 
                     {currentScreen.id === 'subjects' && (
